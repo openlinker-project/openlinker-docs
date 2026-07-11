@@ -17,8 +17,13 @@
   --sl-font: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
   --sl-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
-  /* Slightly tighter radii to match the product's 8/10/14 scale. */
-  --sl-border-radius: 10px;
+  /* Product radius scale (matches the marketing site 1:1): buttons/inputs 8px,
+     cards 10px, small chips 6px. Starlight defaults to pill buttons + tiny
+     card radii, which is the main "shape" mismatch. */
+  --ol-radius-sm: 6px;
+  --ol-radius-md: 8px;
+  --ol-radius-lg: 10px;
+  --sl-border-radius: var(--ol-radius-lg);
 }
 
 /* ---------- Dark theme (brand default) ---------- */
@@ -148,9 +153,16 @@
   color: var(--ol-link-hover, var(--sl-color-white));
 }
 
-/* Primary hero/CTA button: solid brand orange + dark text, like the marketing
-   "Star on GitHub" button. Starlight's default fills it with the pale
-   `--sl-color-text-accent` shade instead. (Unlayered → beats @layer.) */
+/* ---------- Buttons — mirror the marketing Button.astro ----------
+   Marketing buttons are an 8px rounded rectangle with a 1px border and
+   weight 600; Starlight ships pill-shaped buttons. (Unlayered → beats
+   Starlight's @layer rules.) */
+.sl-link-button {
+  border-radius: var(--ol-radius-md);
+  border: 1px solid transparent;
+  font-weight: 600;
+}
+/* Primary: solid brand orange + dark text (the "Star on GitHub" CTA). */
 .sl-link-button.primary {
   background-color: var(--ol-accent);
   border-color: var(--ol-accent);
@@ -160,14 +172,36 @@
   background-color: var(--ol-accent-hover);
   border-color: var(--ol-accent-hover);
 }
+/* Secondary: ghost — transparent, text-coloured 1px border at 30% (→60% on
+   hover), matching Button.astro's `border-current/30`. */
+.sl-link-button.secondary {
+  background-color: transparent;
+  color: var(--sl-color-white);
+  border-color: color-mix(in oklab, currentColor 30%, transparent);
+}
+.sl-link-button.secondary:hover {
+  background-color: transparent;
+  border-color: color-mix(in oklab, currentColor 60%, transparent);
+}
+/* Minimal: plain text link (no border) — e.g. the hero "GitHub" action. */
+.sl-link-button.minimal {
+  color: var(--sl-color-white);
+}
 
-/* Cards: Starlight rotates the icon chip through purple/orange/green/red/blue
-   by nth-child. That rainbow fights OpenLinker's single-accent restraint —
-   flatten it to one neutral chip with an accent glyph. */
+/* ---------- Cards — mirror FeatureCard.astro ----------
+   10px radius, 1px subtle border, surface background. Also flatten
+   Starlight's per-nth-child rainbow icon chips (purple/green/red/blue) into
+   one consistent accent-on-surface chip. */
 .card {
-  --sl-card-border: var(--sl-color-hairline);
+  --sl-card-border: var(--ol-border-subtle);
   --sl-card-bg: var(--sl-color-gray-6);
+  border-radius: var(--ol-radius-lg);
+  border-color: var(--ol-border-subtle);
+  /* surface (19%) on the 14% canvas — subtle elevation, like FeatureCard.
+     Starlight defaults card bg to --sl-color-black (flat 14%). */
+  background-color: var(--sl-color-gray-6);
 }
 .card .icon {
   color: var(--ol-accent);
+  border-radius: var(--ol-radius-md);
 }
