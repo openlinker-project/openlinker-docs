@@ -24,43 +24,93 @@
 /* ---------- Dark theme (brand default) ---------- */
 :root,
 :root[data-theme='dark'] {
-  /* Accent — signal orange, the exact brand value (matches the marketing
-     site's --color-accent 1:1). `-high` is the lighter, higher-contrast
-     variant used for accent TEXT on the dark canvas. */
+  /* Marketing-site dark tokens, mirrored 1:1 from openlinker.io
+     (global.css `[data-theme='dark']`). Starlight variables below alias
+     these, so the two sites share one source of truth for colour. */
+  --ol-canvas: oklch(14% 0.005 270);
+  --ol-shell: oklch(16% 0.006 270);
+  --ol-surface: oklch(19% 0.007 270);
+  --ol-surface-elevated: oklch(22% 0.008 270);
+  --ol-surface-muted: oklch(24% 0.009 270);
+  --ol-surface-hover: oklch(28% 0.010 270);
+  --ol-text-primary: oklch(96% 0.006 270);
+  --ol-text-secondary: oklch(78% 0.010 270);
+  --ol-text-muted: oklch(60% 0.012 270);
+  --ol-text-disabled: oklch(42% 0.012 270);
+  --ol-link: oklch(76% 0.14 245);
+  --ol-link-hover: oklch(84% 0.12 245);
+  --ol-border-subtle: oklch(24% 0.010 270);
+  --ol-border-default: oklch(30% 0.012 270);
+  --ol-border-strong: oklch(42% 0.014 270);
+  --ol-accent: oklch(72% 0.18 50);
+  --ol-accent-hover: oklch(78% 0.18 50);
+  --ol-on-accent: oklch(20% 0.012 80);
+
+  /* Accent — signal orange (brand mark, CTAs, active state). `-high` is the
+     lighter, higher-contrast variant used for accent TEXT on dark. */
   --sl-color-accent-low: oklch(30% 0.09 50);
-  --sl-color-accent: oklch(72% 0.18 50);
+  --sl-color-accent: var(--ol-accent);
   --sl-color-accent-high: oklch(83% 0.14 55);
 
-  --sl-color-white: oklch(96% 0.006 270);
+  /* Gray ramp (light → dark) aliased to the marketing text/surface steps. */
+  --sl-color-white: var(--ol-text-primary);
   --sl-color-gray-1: oklch(90% 0.008 270);
-  --sl-color-gray-2: oklch(78% 0.010 270);
-  --sl-color-gray-3: oklch(60% 0.012 270);
-  --sl-color-gray-4: oklch(42% 0.012 270);
-  --sl-color-gray-5: oklch(28% 0.010 270);
-  --sl-color-gray-6: oklch(19% 0.007 270);
-  --sl-color-black: oklch(14% 0.005 270);
+  --sl-color-gray-2: var(--ol-text-secondary);
+  --sl-color-gray-3: var(--ol-text-muted);
+  --sl-color-gray-4: var(--ol-text-disabled);
+  --sl-color-gray-5: var(--ol-border-default);
+  --sl-color-gray-6: var(--ol-surface);
+  --sl-color-gray-7: var(--ol-shell);
+  --sl-color-black: var(--ol-canvas);
+
+  /* Hairlines/borders → the marketing border steps. */
+  --sl-color-hairline: var(--ol-border-subtle);
+  --sl-color-hairline-shade: var(--ol-border-subtle);
+  --sl-color-hairline-light: var(--ol-border-default);
 
   /* Flat chrome: header + sidebar share the page canvas (14%), like the
      marketing site — not Starlight's default lighter-gray nav/sidebar. */
-  --sl-color-bg-nav: var(--sl-color-black);
-  --sl-color-bg-sidebar: var(--sl-color-black);
+  --sl-color-bg-nav: var(--ol-canvas);
+  --sl-color-bg-sidebar: var(--ol-canvas);
 }
 
 /* ---------- Light theme ---------- */
+/* Values scraped 1:1 from openlinker.io's light theme (warm-neutral, hue 80).
+   `--ol-link` has no light override on the marketing site, so we use the
+   product token's darker blue for contrast on white. */
 :root[data-theme='light'] {
-  --sl-color-accent-low: oklch(93% 0.045 62);
-  --sl-color-accent: oklch(66% 0.18 50);
-  --sl-color-accent-high: oklch(44% 0.15 48);
+  --ol-canvas: oklch(99% 0.003 80);
+  --ol-surface: #ffffff;
+  --ol-surface-muted: oklch(96% 0.005 80);
+  --ol-text-primary: oklch(20% 0.012 80);
+  --ol-text-secondary: oklch(38% 0.010 80);
+  --ol-text-muted: oklch(52% 0.008 80);
+  --ol-link: oklch(50% 0.14 250);
+  --ol-link-hover: oklch(42% 0.15 250);
+  --ol-border-subtle: oklch(93.5% 0.006 80);
+  --ol-border-default: oklch(88% 0.008 80);
+  --ol-border-strong: oklch(78% 0.010 80);
+  --ol-accent: oklch(72% 0.18 50);
+  --ol-accent-hover: oklch(62% 0.19 50);
+  --ol-on-accent: oklch(20% 0.012 80);
 
-  --sl-color-white: oklch(20% 0.012 80);
+  --sl-color-accent-low: oklch(93% 0.045 62);
+  --sl-color-accent: var(--ol-accent);
+  --sl-color-accent-high: oklch(50% 0.16 48);
+
+  --sl-color-white: var(--ol-text-primary);
   --sl-color-gray-1: oklch(30% 0.010 80);
-  --sl-color-gray-2: oklch(38% 0.010 80);
-  --sl-color-gray-3: oklch(52% 0.008 80);
+  --sl-color-gray-2: var(--ol-text-secondary);
+  --sl-color-gray-3: var(--ol-text-muted);
   --sl-color-gray-4: oklch(70% 0.006 80);
-  --sl-color-gray-5: oklch(88% 0.008 80);
-  --sl-color-gray-6: oklch(96% 0.005 80);
+  --sl-color-gray-5: var(--ol-border-default);
+  --sl-color-gray-6: var(--ol-surface-muted);
   --sl-color-gray-7: oklch(97.5% 0.004 80);
-  --sl-color-black: oklch(99% 0.003 80);
+  --sl-color-black: var(--ol-canvas);
+
+  --sl-color-hairline: var(--ol-border-subtle);
+  --sl-color-hairline-shade: var(--ol-border-subtle);
+  --sl-color-hairline-light: var(--ol-border-default);
 }
 
 /* Tabular figures in tables + code, matching the product's numeric columns. */
@@ -87,4 +137,13 @@
   color: var(--sl-color-text-accent);
   background-color: var(--sl-color-gray-6);
   font-weight: 600;
+}
+
+/* Body links use the marketing site's dedicated link colour (blue), not the
+   orange accent — orange stays reserved for CTAs, active state, and emphasis. */
+.sl-markdown-content a:not(:where(.not-content *)) {
+  color: var(--ol-link, var(--sl-color-text-accent));
+}
+.sl-markdown-content a:not(:where(.not-content *)):hover {
+  color: var(--ol-link-hover, var(--sl-color-white));
 }
