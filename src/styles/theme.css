@@ -147,3 +147,27 @@
 .sl-markdown-content a:not(:where(.not-content *)):hover {
   color: var(--ol-link-hover, var(--sl-color-white));
 }
+
+/* Primary hero/CTA button: solid brand orange + dark text, like the marketing
+   "Star on GitHub" button. Starlight's default fills it with the pale
+   `--sl-color-text-accent` shade instead. (Unlayered → beats @layer.) */
+.sl-link-button.primary {
+  background-color: var(--ol-accent);
+  border-color: var(--ol-accent);
+  color: var(--ol-on-accent);
+}
+.sl-link-button.primary:hover {
+  background-color: var(--ol-accent-hover);
+  border-color: var(--ol-accent-hover);
+}
+
+/* Cards: Starlight rotates the icon chip through purple/orange/green/red/blue
+   by nth-child. That rainbow fights OpenLinker's single-accent restraint —
+   flatten it to one neutral chip with an accent glyph. */
+.card {
+  --sl-card-border: var(--sl-color-hairline);
+  --sl-card-bg: var(--sl-color-gray-6);
+}
+.card .icon {
+  color: var(--ol-accent);
+}
