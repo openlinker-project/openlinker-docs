@@ -68,6 +68,16 @@ const SOURCES = [
     description:
       "OpenLinker's hexagonal (ports-and-adapters) architecture: how the framework-free domain, capability ports, and pluggable adapters fit together.",
   },
+  // Integrations — per-adapter setup guides (one per live integration).
+  // These live under libs/integrations/<name>/docs/ in the product repo.
+  { src: 'libs/integrations/woocommerce/docs/setup-guide.md', slug: 'integrations/woocommerce' },
+  { src: 'libs/integrations/allegro/docs/setup-guide.md', slug: 'integrations/allegro' },
+  { src: 'libs/integrations/erli/docs/setup-guide.md', slug: 'integrations/erli' },
+  { src: 'libs/integrations/inpost/docs/setup-guide.md', slug: 'integrations/inpost' },
+  { src: 'libs/integrations/dpd-polska/docs/setup-guide.md', slug: 'integrations/dpd' },
+  { src: 'libs/integrations/ksef/docs/setup-guide.md', slug: 'integrations/ksef' },
+  { src: 'libs/integrations/subiekt/docs/setup-guide.md', slug: 'integrations/subiekt' },
+
   // Operate
   { src: 'docs/webhooks/overview.md', slug: 'webhooks/overview' },
   { src: 'docs/webhooks/prestashop.md', slug: 'webhooks/prestashop' },

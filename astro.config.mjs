@@ -91,6 +91,18 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Integrations',
+          items: [
+            { label: 'WooCommerce', slug: 'integrations/woocommerce' },
+            { label: 'Allegro', slug: 'integrations/allegro' },
+            { label: 'ERLI', slug: 'integrations/erli' },
+            { label: 'InPost', slug: 'integrations/inpost' },
+            { label: 'DPD', slug: 'integrations/dpd' },
+            { label: 'KSeF', slug: 'integrations/ksef' },
+            { label: 'Subiekt nexo', slug: 'integrations/subiekt' },
+          ],
+        },
+        {
           label: 'Architecture',
           items: [{ label: 'Architecture overview', slug: 'architecture-overview' }],
         },
