@@ -41,6 +41,11 @@ export default defineConfig({
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/openlinker-project/openlinker' },
       ],
+      components: {
+        // Adds an "openlinker.io ↗" link back to the marketing site in the
+        // header, before the default social icons. See HeaderLinks.astro.
+        SocialIcons: './src/components/HeaderLinks.astro',
+      },
       editLink: {
         // Docs are single-sourced from the product repo; "edit" points there.
         baseUrl: 'https://github.com/openlinker-project/openlinker/edit/main/docs/',

@@ -1,0 +1,25 @@
+---
+// Override for Starlight's header social-icons slot: prepend a link back to
+// the main marketing site (openlinker.io) before the default social icons,
+// so the docs subdomain always has a way home.
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+---
+
+<a href="https://openlinker.io" class="site-return-link" title="openlinker.io">
+  <span>openlinker.io</span>
+  <svg
+    aria-hidden="true"
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M7 17 17 7M8 7h9v9" />
+  </svg>
+</a>
+
+<Default {...Astro.props} />

@@ -133,6 +133,28 @@
   letter-spacing: -0.02em;
 }
 
+/* "openlinker.io ↗" link back to the marketing site, in the header cluster. */
+.site-return-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-size: var(--sl-text-sm);
+  font-weight: 500;
+  color: var(--sl-color-gray-2);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+.site-return-link:hover {
+  color: var(--sl-color-white);
+}
+/* On narrow headers, drop the wordmark and keep just the arrow to save room. */
+@media (max-width: 50rem) {
+  .site-return-link span {
+    display: none;
+  }
+}
+
 /* Active sidebar item: accent TEXT on a subtle muted surface, instead of
    Starlight's default solid-orange fill — keeps the restrained "cockpit"
    posture and reserves saturated orange for CTAs. */
