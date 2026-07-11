@@ -22,28 +22,32 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Icon } from '@astrojs/starlight/components';
 
 ## Start here
 
-<CardGrid stagger>
-  <Card title="Getting started" icon="rocket">
-    Clone the repo, bring up the dev stack, and connect your first shop and
-    marketplace. [Getting started →](/getting-started/)
-  </Card>
-  <Card title="One-command demo" icon="seti:docker">
-    Spin up a full demo environment with a single command.
-    [Demo setup →](/demo-setup/)
-  </Card>
-  <Card title="Build the adapters" icon="puzzle">
-    OpenLinker ships the channel-manager plumbing; your adapters plug into a
-    stable SDK. [Plugin author guide →](/plugin-author-guide/)
-  </Card>
-  <Card title="Architecture" icon="setting">
-    Hexagonal core, open-world capability ports, framework-free domain.
-    [Architecture overview →](/architecture-overview/)
-  </Card>
-</CardGrid>
+<div class="start-grid not-content">
+  <a class="start-card" href="/getting-started/">
+    <span class="start-card-icon"><Icon name="rocket" size="1.25rem" /></span>
+    <span class="start-card-title">Getting started</span>
+    <span class="start-card-body">Clone the repo, bring up the dev stack, and connect your first shop and marketplace.</span>
+  </a>
+  <a class="start-card" href="/demo-setup/">
+    <span class="start-card-icon"><Icon name="seti:docker" size="1.25rem" /></span>
+    <span class="start-card-title">One-command demo</span>
+    <span class="start-card-body">Spin up a full demo environment with a single command.</span>
+  </a>
+  <a class="start-card" href="/plugin-author-guide/">
+    <span class="start-card-icon"><Icon name="puzzle" size="1.25rem" /></span>
+    <span class="start-card-title">Build the adapters</span>
+    <span class="start-card-body">OpenLinker ships the channel-manager plumbing; your adapters plug into a stable SDK.</span>
+  </a>
+  <a class="start-card" href="/architecture-overview/">
+    <span class="start-card-icon"><Icon name="setting" size="1.25rem" /></span>
+    <span class="start-card-title">Architecture</span>
+    <span class="start-card-body">Hexagonal core, open-world capability ports, framework-free domain.</span>
+  </a>
+</div>
 
 ---
 
