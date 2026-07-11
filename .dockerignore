@@ -1,0 +1,11 @@
+node_modules
+dist
+.astro
+.git
+.github
+.env
+.env.*
+*.log
+.DS_Store
+# generated at build time by scripts/sync-docs.mjs
+src/content/docs/**/*.md

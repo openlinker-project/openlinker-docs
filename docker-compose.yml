@@ -1,0 +1,18 @@
+# Reference compose for the docs container. On the host, the deploy workflow
+# builds the image and runs `docker compose up -d` from the project dir; a
+# reverse proxy (shared with the marketing site) terminates TLS and routes
+# docs.openlinker.io → this container.
+#
+#   prod  docs.openlinker.io      → :8082
+#   dev   dev.docs.openlinker.io  → :8083
+services:
+  docs:
+    build:
+      context: .
+      args:
+        SITE_URL: ${SITE_URL:-https://docs.openlinker.io}
+    image: openlinker-docs:${TAG:-main}
+    container_name: openlinker-docs
+    restart: unless-stopped
+    ports:
+      - "${DOCS_PORT:-8082}:80"

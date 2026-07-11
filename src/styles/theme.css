@@ -1,0 +1,68 @@
+/*
+ * OpenLinker docs theme — mirrors the product's OKLCH design system and the
+ * marketing site (openlinker.io). Maps OpenLinker tokens onto Starlight's
+ * CSS custom properties. OKLCH-native everywhere, like the product.
+ *
+ *   Dark surfaces:  cool graphite, hue 270  (brand default)
+ *   Light surfaces: warm-neutral, hue 80
+ *   Accent:         signal orange, oklch(72% 0.18 50) — the brand mark
+ *
+ * Starlight's gray scale in DARK mode runs light→dark (gray-1 lightest,
+ * gray-6 darkest); `--sl-color-black` is the page background, `--sl-color-white`
+ * is body text. The light-theme block below inverts, matching Starlight's own
+ * built-in light overrides.
+ */
+
+:root {
+  --sl-font: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --sl-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Slightly tighter radii to match the product's 8/10/14 scale. */
+  --sl-border-radius: 10px;
+}
+
+/* ---------- Dark theme (brand default) ---------- */
+:root,
+:root[data-theme='dark'] {
+  /* Accent — signal orange. `-high` is the lighter, text-on-dark variant. */
+  --sl-color-accent-low: oklch(30% 0.09 50);
+  --sl-color-accent: oklch(60% 0.17 50);
+  --sl-color-accent-high: oklch(83% 0.13 62);
+
+  --sl-color-white: oklch(96% 0.006 270);
+  --sl-color-gray-1: oklch(90% 0.008 270);
+  --sl-color-gray-2: oklch(78% 0.010 270);
+  --sl-color-gray-3: oklch(60% 0.012 270);
+  --sl-color-gray-4: oklch(42% 0.012 270);
+  --sl-color-gray-5: oklch(28% 0.010 270);
+  --sl-color-gray-6: oklch(19% 0.007 270);
+  --sl-color-black: oklch(14% 0.005 270);
+}
+
+/* ---------- Light theme ---------- */
+:root[data-theme='light'] {
+  --sl-color-accent-low: oklch(93% 0.045 62);
+  --sl-color-accent: oklch(66% 0.18 50);
+  --sl-color-accent-high: oklch(44% 0.15 48);
+
+  --sl-color-white: oklch(20% 0.012 80);
+  --sl-color-gray-1: oklch(30% 0.010 80);
+  --sl-color-gray-2: oklch(38% 0.010 80);
+  --sl-color-gray-3: oklch(52% 0.008 80);
+  --sl-color-gray-4: oklch(70% 0.006 80);
+  --sl-color-gray-5: oklch(88% 0.008 80);
+  --sl-color-gray-6: oklch(96% 0.005 80);
+  --sl-color-gray-7: oklch(97.5% 0.004 80);
+  --sl-color-black: oklch(99% 0.003 80);
+}
+
+/* Tabular figures in tables + code, matching the product's numeric columns. */
+.sl-markdown-content table td,
+.sl-markdown-content code {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Brand accent on the site title wordmark, if shown. */
+.site-title {
+  letter-spacing: -0.01em;
+}

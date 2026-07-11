@@ -1,0 +1,15 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# generated docs — synced from the product repo at build time (see scripts/sync-docs.mjs)
+# the hand-authored landing page (index.mdx) is kept; everything else here is generated
+src/content/docs/**/*.md
+
+# env / misc
+.env
+.env.*
+.DS_Store

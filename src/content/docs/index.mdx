@@ -1,0 +1,51 @@
+---
+title: OpenLinker documentation
+description: Self-hosted, open-source e-commerce orchestration — sync orders, inventory, and listings between your shop and the marketplaces you sell on.
+template: splash
+hero:
+  tagline: The open-source e-commerce orchestration platform. Self-hosted, plugin-native, Apache 2.0.
+  image:
+    dark: ../../assets/logo-mono-graphite.svg
+    light: ../../assets/logo-mono-black.svg
+  actions:
+    - text: Getting started
+      link: /getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: Build an adapter
+      link: /plugin-author-guide/
+      icon: puzzle
+    - text: GitHub
+      link: https://github.com/openlinker-project/openlinker
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Start here
+
+<CardGrid stagger>
+  <Card title="Getting started" icon="rocket">
+    Clone the repo, bring up the dev stack, and connect your first shop and
+    marketplace. [Getting started →](/getting-started/)
+  </Card>
+  <Card title="One-command demo" icon="seti:docker">
+    Spin up a full demo environment with a single command.
+    [Demo setup →](/demo-setup/)
+  </Card>
+  <Card title="Build the adapters" icon="puzzle">
+    OpenLinker ships the channel-manager plumbing; your adapters plug into a
+    stable SDK. [Plugin author guide →](/plugin-author-guide/)
+  </Card>
+  <Card title="Architecture" icon="setting">
+    Hexagonal core, open-world capability ports, framework-free domain.
+    [Architecture overview →](/architecture-overview/)
+  </Card>
+</CardGrid>
+
+---
+
+These docs are generated from the [product repository](https://github.com/openlinker-project/openlinker/tree/main/docs).
+OpenLinker is pre-1.0 alpha and moving fast — if something here looks off,
+[open an issue](https://github.com/openlinker-project/openlinker/issues).
