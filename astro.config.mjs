@@ -11,6 +11,14 @@ const site = process.env.SITE_URL ?? 'https://docs.openlinker.io';
 // into src/content/docs/ — see scripts/sync-docs.mjs (SOURCES).
 export default defineConfig({
   site,
+  // Docs are English-only and live at the root (/getting-started/, not
+  // /en/getting-started/). The marketing site uses /en/ + /pl/ prefixes, so
+  // visitors and cross-site links may hit /en/… here — bounce those to the
+  // root equivalent instead of 404ing. If Polish docs ever ship, this becomes
+  // a real /pl/ + /en/ locale split (see astro:i18n) rather than a redirect.
+  redirects: {
+    '/en/[...slug]': '/[...slug]',
+  },
   integrations: [
     starlight({
       title: 'OpenLinker Docs',
