@@ -24,10 +24,12 @@
 /* ---------- Dark theme (brand default) ---------- */
 :root,
 :root[data-theme='dark'] {
-  /* Accent — signal orange. `-high` is the lighter, text-on-dark variant. */
+  /* Accent — signal orange, the exact brand value (matches the marketing
+     site's --color-accent 1:1). `-high` is the lighter, higher-contrast
+     variant used for accent TEXT on the dark canvas. */
   --sl-color-accent-low: oklch(30% 0.09 50);
-  --sl-color-accent: oklch(60% 0.17 50);
-  --sl-color-accent-high: oklch(83% 0.13 62);
+  --sl-color-accent: oklch(72% 0.18 50);
+  --sl-color-accent-high: oklch(83% 0.14 55);
 
   --sl-color-white: oklch(96% 0.006 270);
   --sl-color-gray-1: oklch(90% 0.008 270);
@@ -37,6 +39,11 @@
   --sl-color-gray-5: oklch(28% 0.010 270);
   --sl-color-gray-6: oklch(19% 0.007 270);
   --sl-color-black: oklch(14% 0.005 270);
+
+  /* Flat chrome: header + sidebar share the page canvas (14%), like the
+     marketing site — not Starlight's default lighter-gray nav/sidebar. */
+  --sl-color-bg-nav: var(--sl-color-black);
+  --sl-color-bg-sidebar: var(--sl-color-black);
 }
 
 /* ---------- Light theme ---------- */
@@ -62,7 +69,22 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Brand accent on the site title wordmark, if shown. */
+/* Wordmark: near-white + semibold + tight tracking, matching the marketing
+   site's nav lockup — NOT the accent colour (orange is reserved for
+   operational meaning, not the brand name). */
 .site-title {
-  letter-spacing: -0.01em;
+  color: var(--sl-color-white);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Active sidebar item: accent TEXT on a subtle muted surface, instead of
+   Starlight's default solid-orange fill — keeps the restrained "cockpit"
+   posture and reserves saturated orange for CTAs. */
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+  color: var(--sl-color-text-accent);
+  background-color: var(--sl-color-gray-6);
+  font-weight: 600;
 }

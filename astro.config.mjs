@@ -26,8 +26,10 @@ export default defineConfig({
         'Documentation for OpenLinker — the open-source, self-hosted e-commerce orchestration platform.',
       tagline: 'Self-hosted · Plugin-native · Apache 2.0',
       logo: {
+        // Same transparent (box-less) marks the marketing site uses in its nav:
+        // color glyph on the dark header, mono-black on light surfaces.
         light: './src/assets/logo-mono-black.svg',
-        dark: './src/assets/logo-mono-graphite.svg',
+        dark: './src/assets/logo-color.svg',
         replacesTitle: false,
         alt: 'OpenLinker',
       },
