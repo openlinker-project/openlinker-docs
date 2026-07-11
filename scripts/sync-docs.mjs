@@ -36,6 +36,12 @@ const OUT_DIR = fileURLToPath(new URL('../src/content/docs', import.meta.url));
 
 // The published set. `src` is repo-relative; `slug` is the docs-site route.
 // Keep in sync with the hand-authored sidebar in astro.config.mjs.
+//
+// Optional per-entry overrides (use sparingly, only when synthesis is wrong):
+//   title:       overrides the first-H1 title
+//   description: overrides the first-paragraph meta description
+// These win over the source doc's own frontmatter and over synthesis, so we
+// can correct a bad auto-summary here without editing the product repo.
 const SOURCES = [
   // Start here
   { src: 'docs/getting-started.md', slug: 'getting-started' },
@@ -54,7 +60,14 @@ const SOURCES = [
   { src: 'PUBLIC_API.md', slug: 'public-api' },
   { src: 'docs/connections-and-adapter-resolution.md', slug: 'connections-and-adapter-resolution' },
   // Architecture
-  { src: 'docs/architecture-overview.md', slug: 'architecture-overview' },
+  {
+    src: 'docs/architecture-overview.md',
+    slug: 'architecture-overview',
+    // Synthesis grabs "…designed to be:" (lead sentence runs into a bullet
+    // list), which dangles as a meta description — override with a real one.
+    description:
+      "OpenLinker's hexagonal (ports-and-adapters) architecture: how the framework-free domain, capability ports, and pluggable adapters fit together.",
+  },
   // Operate
   { src: 'docs/webhooks/overview.md', slug: 'webhooks/overview' },
   { src: 'docs/webhooks/prestashop.md', slug: 'webhooks/prestashop' },
@@ -173,11 +186,15 @@ async function fetchRaw(src) {
   return res.text();
 }
 
-function buildPage({ src, slug }, raw) {
+function buildPage(source, raw) {
+  const { src, slug } = source;
   const { data, body: afterFm } = stripFrontmatter(raw);
   const { title: h1, body: afterTitle } = extractTitle(afterFm);
-  const title = data.title || h1 || slug.split('/').pop().replace(/-/g, ' ');
-  const description = data.description || toDescription(afterTitle);
+  // Precedence: explicit SOURCES override → source-doc frontmatter → synthesis
+  // (first H1 / first paragraph). Overrides let us fix the odd doc whose lead
+  // paragraph isn't a good summary, without touching the product repo.
+  const title = source.title || data.title || h1 || slug.split('/').pop().replace(/-/g, ' ');
+  const description = source.description || data.description || toDescription(afterTitle);
   const bodyOut = rewriteLinks(afterTitle, src).trim() + '\n';
 
   const fm = ['---', `title: ${yaml(title)}`];
