@@ -1,7 +1,7 @@
 name: Deploy
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   # Fired by the product repo's release workflow (same dispatch that redeploys
   # the marketing site's /changelog), plus an optional docs-only signal, so a
   # release or a docs edit upstream redeploys these docs. repository_dispatch
@@ -21,13 +21,13 @@ jobs:
     environment: ${{ github.ref_name }}
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Build Docker image
         run: docker build . --tag openlinker-docs:${{ github.ref_name }} -f Dockerfile --build-arg "SITE_URL=${{ vars.SITE_URL }}"
 
       - name: Run Docker image
-        working-directory: ${{ vars.PROJECT_DIR }}
+        working-directory: ${{ secrets.PROJECT_DIR }}
         env:
           TAG: ${{ github.ref_name }}
         run: docker compose up -d
