@@ -9,6 +9,9 @@ node_modules/
 # the hand-authored landing page (index.mdx) is kept; everything else here is generated
 src/content/docs/**/*.md
 
+# generated /llms.txt — rebuilt from SOURCES on every build (see scripts/sync-docs.mjs)
+public/llms.txt
+
 # env / misc
 .env
 .env.*
