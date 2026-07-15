@@ -51,10 +51,11 @@ const SOURCES = [
   { src: 'docs/user-guide/01-overview.md', slug: 'user-guide/overview' },
   { src: 'docs/user-guide/02-connecting-a-platform.md', slug: 'user-guide/connecting-a-platform' },
   { src: 'docs/user-guide/03-catalog-and-inventory.md', slug: 'user-guide/catalog-and-inventory' },
-  { src: 'docs/user-guide/04-listings.md', slug: 'user-guide/listings' },
-  { src: 'docs/user-guide/05-orders.md', slug: 'user-guide/orders' },
-  { src: 'docs/user-guide/06-diagnostics.md', slug: 'user-guide/diagnostics' },
-  { src: 'docs/user-guide/07-settings-and-admin.md', slug: 'user-guide/settings-and-admin' },
+  { src: 'docs/user-guide/04-invoices.md', slug: 'user-guide/invoices' },
+  { src: 'docs/user-guide/05-listings.md', slug: 'user-guide/listings' },
+  { src: 'docs/user-guide/06-orders.md', slug: 'user-guide/orders' },
+  { src: 'docs/user-guide/07-diagnostics.md', slug: 'user-guide/diagnostics' },
+  { src: 'docs/user-guide/08-settings-and-admin.md', slug: 'user-guide/settings-and-admin' },
   // Build adapters
   { src: 'docs/plugin-author-guide.md', slug: 'plugin-author-guide' },
   { src: 'PUBLIC_API.md', slug: 'public-api' },
@@ -70,6 +71,7 @@ const SOURCES = [
   },
   // Integrations — per-adapter setup guides (one per live integration).
   // These live under libs/integrations/<name>/docs/ in the product repo.
+  { src: 'libs/integrations/prestashop/docs/setup-guide.md', slug: 'integrations/prestashop' },
   { src: 'libs/integrations/woocommerce/docs/setup-guide.md', slug: 'integrations/woocommerce' },
   { src: 'libs/integrations/allegro/docs/setup-guide.md', slug: 'integrations/allegro' },
   { src: 'libs/integrations/erli/docs/setup-guide.md', slug: 'integrations/erli' },
