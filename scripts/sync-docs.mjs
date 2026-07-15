@@ -43,6 +43,10 @@ const SITE = (process.env.SITE_URL ?? 'https://docs.openlinker.io').replace(/\/$
 // build, so it can never drift from what's actually published.
 const LLMS_OUT = fileURLToPath(new URL('../public/llms.txt', import.meta.url));
 
+// robots.txt is generated (not static) so the Sitemap: URL tracks SITE_URL —
+// the dev image advertises dev.docs.openlinker.io, not the production host.
+const ROBOTS_OUT = fileURLToPath(new URL('../public/robots.txt', import.meta.url));
+
 // Section grouping for llms.txt. Order + labels mirror the hand-authored
 // sidebar in astro.config.mjs; within a section, pages keep their SOURCES
 // (reading) order. Any slug matching none of these falls into a trailing
@@ -307,6 +311,26 @@ function buildLlmsTxt(pages) {
   return out.join('\n').trimEnd() + '\n';
 }
 
+// ---------- robots.txt ----------
+
+// Allow-all robots.txt that points crawlers at the sitemap. llms.txt has no
+// standard robots directive, so it's advertised as a comment (well-behaved
+// LLM crawlers look for /llms.txt directly).
+function buildRobotsTxt() {
+  return (
+    [
+      '# https://www.robotstxt.org/robotstxt.html',
+      'User-agent: *',
+      'Allow: /',
+      '',
+      `Sitemap: ${SITE}/sitemap-index.xml`,
+      '',
+      '# LLM-friendly index (https://llmstxt.org)',
+      `# ${SITE}/llms.txt`,
+    ].join('\n') + '\n'
+  );
+}
+
 async function main() {
   await mkdir(OUT_DIR, { recursive: true });
   await cleanGenerated(OUT_DIR);
@@ -339,7 +363,8 @@ async function main() {
 
   await mkdir(path.dirname(LLMS_OUT), { recursive: true });
   await writeFile(LLMS_OUT, buildLlmsTxt(pages), 'utf8');
-  console.log(`[sync-docs] wrote llms.txt (${written} pages)`);
+  await writeFile(ROBOTS_OUT, buildRobotsTxt(), 'utf8');
+  console.log(`[sync-docs] wrote llms.txt (${written} pages) + robots.txt`);
 }
 
 main().catch((err) => {
