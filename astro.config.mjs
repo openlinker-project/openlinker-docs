@@ -76,6 +76,7 @@ export default defineConfig({
             { label: 'Overview', slug: 'user-guide/overview' },
             { label: 'Connecting a platform', slug: 'user-guide/connecting-a-platform' },
             { label: 'Catalog & inventory', slug: 'user-guide/catalog-and-inventory' },
+            { label: 'Invoices', slug: 'user-guide/invoices' },
             { label: 'Listings', slug: 'user-guide/listings' },
             { label: 'Orders', slug: 'user-guide/orders' },
             { label: 'Diagnostics', slug: 'user-guide/diagnostics' },
@@ -93,6 +94,7 @@ export default defineConfig({
         {
           label: 'Integrations',
           items: [
+            { label: 'PrestaShop', slug: 'integrations/prestashop' },
             { label: 'WooCommerce', slug: 'integrations/woocommerce' },
             { label: 'Allegro', slug: 'integrations/allegro' },
             { label: 'ERLI', slug: 'integrations/erli' },

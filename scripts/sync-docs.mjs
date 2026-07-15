@@ -34,6 +34,35 @@ const EDIT = `https://github.com/${REPO}/edit/${BRANCH}`;
 
 const OUT_DIR = fileURLToPath(new URL('../src/content/docs', import.meta.url));
 
+// Canonical site URL — used to build absolute links in llms.txt. Mirrors the
+// default in astro.config.mjs; override with SITE_URL for the dev image.
+const SITE = (process.env.SITE_URL ?? 'https://docs.openlinker.io').replace(/\/$/, '');
+
+// llms.txt lands in public/ so Astro copies it to the site root (/llms.txt).
+// Like the generated *.md pages it is gitignored — rebuilt from SOURCES every
+// build, so it can never drift from what's actually published.
+const LLMS_OUT = fileURLToPath(new URL('../public/llms.txt', import.meta.url));
+
+// robots.txt is generated (not static) so the Sitemap: URL tracks SITE_URL —
+// the dev image advertises dev.docs.openlinker.io, not the production host.
+const ROBOTS_OUT = fileURLToPath(new URL('../public/robots.txt', import.meta.url));
+
+// Section grouping for llms.txt. Order + labels mirror the hand-authored
+// sidebar in astro.config.mjs; within a section, pages keep their SOURCES
+// (reading) order. Any slug matching none of these falls into a trailing
+// "More" section rather than being silently dropped.
+const LLMS_SECTIONS = [
+  { label: 'Start here', match: (s) => ['getting-started', 'demo-setup', 'capabilities'].includes(s) },
+  { label: 'User guide', match: (s) => s.startsWith('user-guide/') },
+  {
+    label: 'Build adapters',
+    match: (s) => ['plugin-author-guide', 'public-api', 'connections-and-adapter-resolution'].includes(s),
+  },
+  { label: 'Integrations', match: (s) => s.startsWith('integrations/') },
+  { label: 'Architecture', match: (s) => s === 'architecture-overview' },
+  { label: 'Operate', match: (s) => s.startsWith('webhooks/') || s === 'migrations' },
+];
+
 // The published set. `src` is repo-relative; `slug` is the docs-site route.
 // Keep in sync with the hand-authored sidebar in astro.config.mjs.
 //
@@ -51,10 +80,11 @@ const SOURCES = [
   { src: 'docs/user-guide/01-overview.md', slug: 'user-guide/overview' },
   { src: 'docs/user-guide/02-connecting-a-platform.md', slug: 'user-guide/connecting-a-platform' },
   { src: 'docs/user-guide/03-catalog-and-inventory.md', slug: 'user-guide/catalog-and-inventory' },
-  { src: 'docs/user-guide/04-listings.md', slug: 'user-guide/listings' },
-  { src: 'docs/user-guide/05-orders.md', slug: 'user-guide/orders' },
-  { src: 'docs/user-guide/06-diagnostics.md', slug: 'user-guide/diagnostics' },
-  { src: 'docs/user-guide/07-settings-and-admin.md', slug: 'user-guide/settings-and-admin' },
+  { src: 'docs/user-guide/04-invoices.md', slug: 'user-guide/invoices' },
+  { src: 'docs/user-guide/05-listings.md', slug: 'user-guide/listings' },
+  { src: 'docs/user-guide/06-orders.md', slug: 'user-guide/orders' },
+  { src: 'docs/user-guide/07-diagnostics.md', slug: 'user-guide/diagnostics' },
+  { src: 'docs/user-guide/08-settings-and-admin.md', slug: 'user-guide/settings-and-admin' },
   // Build adapters
   { src: 'docs/plugin-author-guide.md', slug: 'plugin-author-guide' },
   { src: 'PUBLIC_API.md', slug: 'public-api' },
@@ -70,6 +100,7 @@ const SOURCES = [
   },
   // Integrations — per-adapter setup guides (one per live integration).
   // These live under libs/integrations/<name>/docs/ in the product repo.
+  { src: 'libs/integrations/prestashop/docs/setup-guide.md', slug: 'integrations/prestashop' },
   { src: 'libs/integrations/woocommerce/docs/setup-guide.md', slug: 'integrations/woocommerce' },
   { src: 'libs/integrations/allegro/docs/setup-guide.md', slug: 'integrations/allegro' },
   { src: 'libs/integrations/erli/docs/setup-guide.md', slug: 'integrations/erli' },
@@ -211,7 +242,7 @@ function buildPage(source, raw) {
   if (description) fm.push(`description: ${yaml(description)}`);
   fm.push(`editUrl: ${EDIT}/${src}`);
   fm.push('---', '', '');
-  return fm.join('\n') + bodyOut;
+  return { page: fm.join('\n') + bodyOut, title, description };
 }
 
 // JSON strings are valid YAML double-quoted scalars for plain text — safe for
@@ -235,27 +266,93 @@ async function cleanGenerated(dir) {
   }
 }
 
+// ---------- llms.txt ----------
+
+// Build an /llms.txt index (see llmstxt.org) from the pages we just published,
+// so LLMs get a curated, section-grouped map of the docs with one-line
+// summaries — the same title/description synthesised for each page.
+function buildLlmsTxt(pages) {
+  const bySlug = new Map(pages.map((p) => [p.slug, p]));
+  const ordered = SOURCES.map((s) => bySlug.get(s.slug)).filter(Boolean); // SOURCES/reading order
+
+  const link = (p) => {
+    const url = `${SITE}/${p.slug}/`;
+    return p.description ? `- [${p.title}](${url}): ${p.description}` : `- [${p.title}](${url})`;
+  };
+
+  const out = [
+    '# OpenLinker',
+    '',
+    '> OpenLinker is an open-source, self-hosted e-commerce orchestration platform: connect shops, marketplaces, carriers, and invoicing providers behind one pluggable, capability-based core.',
+    '',
+    'Documentation for OpenLinker — self-hosted · plugin-native · Apache 2.0. Pages below are single-sourced from the product repository and published on docs.openlinker.io.',
+    '',
+  ];
+
+  const grouped = new Set();
+  for (const { label, match } of LLMS_SECTIONS) {
+    const items = ordered.filter((p) => match(p.slug));
+    if (!items.length) continue;
+    out.push(`## ${label}`, '');
+    for (const p of items) {
+      out.push(link(p));
+      grouped.add(p.slug);
+    }
+    out.push('');
+  }
+
+  const rest = ordered.filter((p) => !grouped.has(p.slug));
+  if (rest.length) {
+    out.push('## More', '');
+    for (const p of rest) out.push(link(p));
+    out.push('');
+  }
+
+  return out.join('\n').trimEnd() + '\n';
+}
+
+// ---------- robots.txt ----------
+
+// Allow-all robots.txt that points crawlers at the sitemap. llms.txt has no
+// standard robots directive, so it's advertised as a comment (well-behaved
+// LLM crawlers look for /llms.txt directly).
+function buildRobotsTxt() {
+  return (
+    [
+      '# https://www.robotstxt.org/robotstxt.html',
+      'User-agent: *',
+      'Allow: /',
+      '',
+      `Sitemap: ${SITE}/sitemap-index.xml`,
+      '',
+      '# LLM-friendly index (https://llmstxt.org)',
+      `# ${SITE}/llms.txt`,
+    ].join('\n') + '\n'
+  );
+}
+
 async function main() {
   await mkdir(OUT_DIR, { recursive: true });
   await cleanGenerated(OUT_DIR);
 
-  let written = 0;
+  const pages = [];
   const failed = [];
   await Promise.all(
     SOURCES.map(async (source) => {
       try {
         const raw = await fetchRaw(source.src);
-        const page = buildPage(source, raw);
+        const { page, title, description } = buildPage(source, raw);
         const dest = path.join(OUT_DIR, `${source.slug}.md`);
         await mkdir(path.dirname(dest), { recursive: true });
         await writeFile(dest, page, 'utf8');
-        written++;
+        pages.push({ slug: source.slug, title, description });
       } catch (err) {
         failed.push(`${source.src}: ${err.message}`);
       }
     }),
   );
 
+  const written = pages.length;
   console.log(`[sync-docs] wrote ${written}/${SOURCES.length} pages from ${REPO}@${BRANCH}`);
   if (failed.length) console.warn('[sync-docs] skipped:\n  ' + failed.join('\n  '));
 
@@ -263,6 +360,11 @@ async function main() {
     console.error('[sync-docs] no docs written — failing the build rather than shipping empty docs');
     process.exit(1);
   }
+
+  await mkdir(path.dirname(LLMS_OUT), { recursive: true });
+  await writeFile(LLMS_OUT, buildLlmsTxt(pages), 'utf8');
+  await writeFile(ROBOTS_OUT, buildRobotsTxt(), 'utf8');
+  console.log(`[sync-docs] wrote llms.txt (${written} pages) + robots.txt`);
 }
 
 main().catch((err) => {
