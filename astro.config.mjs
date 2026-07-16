@@ -45,7 +45,14 @@ export default defineConfig({
         // Adds an "openlinker.io ↗" link back to the marketing site in the
         // header, before the default social icons. See HeaderLinks.astro.
         SocialIcons: './src/components/HeaderLinks.astro',
+        // Appends a followed link back to openlinker.io in the page footer
+        // (reciprocal SEO cross-link, issue #4). See Footer.astro.
+        Footer: './src/components/Footer.astro',
       },
+      // Route middleware points the header logo / site-title at openlinker.io
+      // instead of the docs root — the other half of issue #4. See the file
+      // for why this overrides route data rather than the SiteTitle component.
+      routeMiddleware: './src/starlightRouteData.ts',
       editLink: {
         // Docs are single-sourced from the product repo; "edit" points there.
         baseUrl: 'https://github.com/openlinker-project/openlinker/edit/main/docs/',
