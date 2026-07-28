@@ -4,7 +4,13 @@
 // marketing site. Reciprocal SEO cross-link from the docs subdomain to
 // openlinker.io — see issue #4. Deliberately NOT rel="nofollow": it's our own
 // property, so we want link equity to flow.
+//
+// Also carries the Google Analytics cookie-consent banner (see astro.config.mjs
+// for the gtag.js scripts it gates) — Starlight has no dedicated "inject
+// arbitrary body content" slot, and Footer already renders once per page.
 import Default from '@astrojs/starlight/components/Footer.astro';
+
+const gaEnabled = Boolean(import.meta.env.PUBLIC_GA_MEASUREMENT_ID) && Astro.site?.hostname === 'docs.openlinker.io';
 ---
 
 <Default {...Astro.props} />
@@ -26,6 +32,23 @@ import Default from '@astrojs/starlight/components/Footer.astro';
   <span>Back to openlinker.io</span>
 </a>
 
+<a class="main-site-link sl-flex" href="https://openlinker.io/en/legal/" title="Privacy policy">
+  <span>Privacy policy</span>
+</a>
+
+{gaEnabled && (
+  <div id="cookie-consent-banner" role="dialog" aria-live="polite" aria-label="Cookie consent" class="cookie-banner">
+    <p>
+      We use Google Analytics to understand site traffic. It only runs if you accept.
+      <a href="https://openlinker.io/en/legal/">Privacy policy</a>
+    </p>
+    <div class="cookie-banner-actions">
+      <button type="button" data-consent-action="reject">Reject</button>
+      <button type="button" data-consent-action="accept">Accept</button>
+    </div>
+  </div>
+)}
+
 <style>
   @layer starlight.components {
     .main-site-link {
@@ -40,5 +63,108 @@ import Default from '@astrojs/starlight/components/Footer.astro';
     .main-site-link:hover {
       color: var(--sl-color-white);
     }
+
+    .cookie-banner {
+      display: none;
+      position: fixed;
+      inset-inline: 0;
+      bottom: 0;
+      z-index: 50;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: var(--sl-color-bg-nav);
+      border-top: 1px solid var(--sl-color-gray-5);
+      font-size: var(--sl-text-sm);
+      color: var(--sl-color-gray-2);
+    }
+    .cookie-banner.is-visible {
+      display: flex;
+    }
+    .cookie-banner p {
+      margin: 0;
+      max-width: 60ch;
+    }
+    .cookie-banner-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+    .cookie-banner-actions button {
+      font: inherit;
+      font-size: var(--sl-text-sm);
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--sl-color-gray-5);
+      background: transparent;
+      color: var(--sl-color-gray-2);
+      cursor: pointer;
+    }
+    .cookie-banner-actions button[data-consent-action='accept'] {
+      background: var(--sl-color-accent);
+      border-color: var(--sl-color-accent);
+      color: var(--sl-color-black);
+    }
   }
 </style>
+
+{gaEnabled && (
+  <script is:inline>
+    (function () {
+      var COOKIE_NAME = 'ol_consent';
+      var ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
+
+      function readConsent() {
+        var match = document.cookie.split('; ').find(function (c) {
+          return c.indexOf(COOKIE_NAME + '=') === 0;
+        });
+        return match ? match.split('=')[1] : null;
+      }
+
+      // Shared with openlinker.io: a visitor who already answered there
+      // isn't re-prompted here. On any other host (local dev, previews)
+      // the browser scopes the cookie to that host — harmless.
+      function writeConsent(value) {
+        var domain = window.location.hostname.endsWith('openlinker.io') ? '; domain=.openlinker.io' : '';
+        document.cookie = COOKIE_NAME + '=' + value + '; path=/; max-age=' + ONE_YEAR_SECONDS + domain + '; samesite=lax';
+      }
+
+      function updateGtagConsent(granted) {
+        if (typeof window.gtag === 'function') {
+          window.gtag('consent', 'update', { analytics_storage: granted ? 'granted' : 'denied' });
+        }
+      }
+
+      function showBanner() {
+        var el = document.getElementById('cookie-consent-banner');
+        if (el) el.classList.add('is-visible');
+      }
+
+      function hideBanner() {
+        var el = document.getElementById('cookie-consent-banner');
+        if (el) el.classList.remove('is-visible');
+      }
+
+      document.addEventListener('click', function (event) {
+        if (!(event.target instanceof Element)) return;
+        var actionEl = event.target.closest('[data-consent-action]');
+        if (actionEl) {
+          var accepted = actionEl.getAttribute('data-consent-action') === 'accept';
+          writeConsent(accepted ? 'accepted' : 'rejected');
+          updateGtagConsent(accepted);
+          hideBanner();
+          return;
+        }
+        if (event.target.closest('[data-cookie-prefs]')) {
+          showBanner();
+        }
+      });
+
+      if (readConsent() === null) {
+        showBanner();
+      }
+    })();
+  </script>
+)}
