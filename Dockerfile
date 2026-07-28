@@ -26,6 +26,12 @@ ENV SITE_URL=$SITE_URL
 # Product ref the docs are pulled from (override to preview against a branch).
 ARG DOCS_SOURCE_REF="main"
 ENV DOCS_SOURCE_REF=$DOCS_SOURCE_REF
+# Google Analytics 4 measurement ID — this is a static build (nginx serves
+# the output with no Node process at runtime), so unlike the SSR marketing
+# site this MUST be baked in at build time or GA never renders. Empty by
+# default (GA off) until the property exists.
+ARG PUBLIC_GA_MEASUREMENT_ID=""
+ENV PUBLIC_GA_MEASUREMENT_ID=$PUBLIC_GA_MEASUREMENT_ID
 RUN pnpm build
 
 # ---- Runtime (static, nginx) ----

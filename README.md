@@ -81,6 +81,11 @@ The deploy job is gated by the `DEPLOY_ENABLED` repo variable and needs
 `SITE_URL` + `PROJECT_DIR` repo variables set per environment, plus a
 self-hosted runner labelled `main` / `develop` — same as `openlinker-website`.
 
+`PUBLIC_GA_MEASUREMENT_ID` (repo variable, per environment) enables Google
+Analytics 4 — consent-gated, see `Footer.astro`. This is a **static** build
+(no Node process at runtime), so the ID must be a build arg, not just a
+runtime env var; empty/unset means GA stays off.
+
 ## License
 
 Apache-2.0. Documentation content © the OpenLinker project.
