@@ -66,6 +66,10 @@ pnpm sync     # just refresh the content from the product repo
 `DOCS_SOURCE_REF=<branch>` builds against a non-`main` product ref (handy for
 previewing docs changes before they merge).
 
+Build-time variables (`SITE_URL`, `DOCS_SOURCE_REF`, `GITHUB_TOKEN`,
+`PUBLIC_GA_MEASUREMENT_ID`) can be set in a local `.env` - see `.env.example`.
+Shell exports and Docker build args always take precedence over that file.
+
 ## Deployment
 
 Docker + reverse proxy, mirroring the marketing site's setup
@@ -81,10 +85,53 @@ The deploy job is gated by the `DEPLOY_ENABLED` repo variable and needs
 `SITE_URL` + `PROJECT_DIR` repo variables set per environment, plus a
 self-hosted runner labelled `main` / `develop` — same as `openlinker-website`.
 
+## Analytics
+
 `PUBLIC_GA_MEASUREMENT_ID` (repo variable, per environment) enables Google
-Analytics 4 — consent-gated, see `Footer.astro`. This is a **static** build
-(no Node process at runtime), so the ID must be a build arg, not just a
-runtime env var; empty/unset means GA stays off.
+Analytics 4. This is a **static** build (no Node process at runtime), so the ID
+must be a build arg, not just a runtime env var; empty/unset means GA stays off.
+
+GA is additionally gated on the **configured `SITE_URL`** resolving to
+`docs.openlinker.io`. That is a build-time check, not a runtime one: an image
+built for production and previewed on `localhost:8080` still carries GA.
+
+Analytics run in **basic consent mode** - `gtag.js` is not in the document at
+all until the visitor accepts, so nothing (not even a cookieless collect ping)
+reaches Google before that. The measurement ID, the loader, the consent cookie
+and the banner all live in `src/components/Footer.astro`;
+`astro.config.mjs` emits nothing GA-related.
+
+### Cross-site consent cookie (`ol_consent`)
+
+The visitor's analytics choice is stored in one cookie shared by
+`openlinker.io` and `docs.openlinker.io`, so answering the banner on one host
+does not re-prompt on the other. The contract is implemented here in
+`src/lib/consent.ts` and **duplicated by hand** in the `openlinker-website`
+repo (documented there in `DEPLOYMENT.md`). Every field below is load-bearing:
+
+| Field | Value |
+|---|---|
+| name | `ol_consent` |
+| values | exactly `v1:accepted` or `v1:rejected` - nothing else is valid |
+| version | the `v1:` prefix; bump it to force a re-prompt when the set of consent categories changes |
+| `Domain` | `.openlinker.io` when the host is `openlinker.io` or a `*.openlinker.io` subdomain; host-only everywhere else (local dev, previews) |
+| `Path` | `/` |
+| `Max-Age` | `31536000` (12 months) |
+| `SameSite` | `Lax` |
+| `Secure` | set whenever the page is served over https |
+
+Invariants:
+
+- **Readers must validate against the two values above** and treat anything
+  else (empty, stale, truncated, unknown version) as *unanswered*, i.e. show
+  the banner. Treating "not null" as answered produces a state where analytics
+  are denied *and* the banner is hidden, with no way for the visitor to recover.
+- Withdrawal must stay as easy as granting (GDPR Art. 7(3)) - the
+  "Cookie preferences" control in the footer reopens the banner whenever GA is
+  enabled, and rejecting expires every `_ga*` cookie.
+- **Any change to this contract is a coordinated change across both repos.**
+  Nothing in either build fails if they drift; it surfaces as a visitor being
+  re-prompted forever, or as a stale value silently reading as unanswered.
 
 ## License
 

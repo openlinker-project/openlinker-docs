@@ -20,6 +20,10 @@
 //     fails the deploy (docker compose keeps the last good container) rather
 //     than silently shipping an empty docs site.
 
+// Populates process.env from .env (shell / Docker build args win) before any
+// of the process.env reads below. See scripts/load-env.mjs.
+import './load-env.mjs';
+
 import { mkdir, writeFile, readdir, rm, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';

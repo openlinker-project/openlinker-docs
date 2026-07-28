@@ -1,46 +1,85 @@
 ---
 // Override for Starlight's page footer: render the default footer (edit link,
-// last-updated, pagination) and append a followed link back to the main
-// marketing site. Reciprocal SEO cross-link from the docs subdomain to
-// openlinker.io — see issue #4. Deliberately NOT rel="nofollow": it's our own
-// property, so we want link equity to flow.
+// last-updated, pagination) and append a small meta row - a followed link back
+// to the main marketing site (reciprocal SEO cross-link from the docs
+// subdomain to openlinker.io, see issue #4; deliberately NOT rel="nofollow",
+// it's our own property so we want link equity to flow), the privacy policy,
+// and the "Cookie preferences" control that lets a visitor withdraw or change
+// a previous analytics choice (GDPR Art. 7(3): withdrawal must be as easy as
+// granting).
 //
-// Also carries the Google Analytics cookie-consent banner (see astro.config.mjs
-// for the gtag.js scripts it gates) — Starlight has no dedicated "inject
-// arbitrary body content" slot, and Footer already renders once per page.
+// This component also OWNS Google Analytics end to end - the measurement ID
+// resolution, the loader, the consent cookie and the banner. astro.config.mjs
+// deliberately emits nothing GA-related, for two reasons:
+//
+//   1. Single source. The flag was previously derived once in the config
+//      (`process.env`) and once here (`import.meta.env`), and those two
+//      demonstrably disagree for a `.env`-only setup - see src/lib/analytics.ts.
+//   2. No head ordering to get wrong. Starlight sorts entries in its `head`
+//      config with a private importance heuristic; a multi-script gtag
+//      bootstrap depends on that sort keeping the scripts adjacent and in
+//      order. One self-contained script in the body has no such coupling.
+//
+// GA runs in BASIC consent mode: gtag.js is not in the document at all until
+// the visitor has accepted, so nothing (not even a cookieless collect ping)
+// reaches Google beforehand, and the banner copy is literally true. The cost
+// is that analytics initialise at the end of the body rather than in <head>;
+// for a static docs site that is a few milliseconds and worth the simplicity.
+//
+// Starlight has no dedicated "inject arbitrary body content" override slot,
+// and Footer already renders exactly once per page (standard, splash and 404
+// templates alike), which makes it the right host for all of this.
 import Default from '@astrojs/starlight/components/Footer.astro';
+import { consentRuntimeScript } from '../lib/consent';
+import { resolveGaId } from '../lib/analytics';
 
-const gaEnabled = Boolean(import.meta.env.PUBLIC_GA_MEASUREMENT_ID) && Astro.site?.hostname === 'docs.openlinker.io';
+// The ONE place analytics are switched on or off for this build.
+const gaId = resolveGaId(Astro.site?.hostname);
+const gaEnabled = gaId !== '';
+
+// The policy lives on the marketing site and covers both hosts (it names
+// docs.openlinker.io and the ol_consent cookie explicitly - see the companion
+// openlinker-website PR). Same URL in the footer and in the banner.
+const PRIVACY_URL = 'https://openlinker.io/en/legal/';
 ---
 
 <Default {...Astro.props} />
 
-<a class="main-site-link sl-flex" href="https://openlinker.io/" title="OpenLinker — openlinker.io">
-  <svg
-    aria-hidden="true"
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <path d="M19 12H5M12 19l-7-7 7-7" />
-  </svg>
-  <span>Back to openlinker.io</span>
-</a>
+<div id="footer-meta" class="footer-meta">
+  <a class="main-site-link" href="https://openlinker.io/" title="OpenLinker — openlinker.io">
+    <svg
+      aria-hidden="true"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+    <span>Back to openlinker.io</span>
+  </a>
 
-<a class="main-site-link sl-flex" href="https://openlinker.io/en/legal/" title="Privacy policy">
-  <span>Privacy policy</span>
-</a>
+  <a class="main-site-link footer-privacy-link" href={PRIVACY_URL} title="Privacy policy">
+    <span>Privacy policy</span>
+  </a>
+
+  {gaEnabled && (
+    <button type="button" data-cookie-prefs class="main-site-link">
+      <span>Cookie preferences</span>
+    </button>
+  )}
+</div>
 
 {gaEnabled && (
-  <div id="cookie-consent-banner" role="dialog" aria-live="polite" aria-label="Cookie consent" class="cookie-banner">
+  <div id="cookie-consent-banner" class="cookie-banner" role="region" aria-label="Cookie consent">
     <p>
-      We use Google Analytics to understand site traffic. It only runs if you accept.
-      <a href="https://openlinker.io/en/legal/">Privacy policy</a>
+      We use Google Analytics to understand traffic on openlinker.io and docs.openlinker.io.
+      Nothing is loaded or sent to Google unless you accept.
+      <a href={PRIVACY_URL}>Privacy policy</a>
     </p>
     <div class="cookie-banner-actions">
       <button type="button" data-consent-action="reject">Reject</button>
@@ -51,11 +90,23 @@ const gaEnabled = Boolean(import.meta.env.PUBLIC_GA_MEASUREMENT_ID) && Astro.sit
 
 <style>
   @layer starlight.components {
+    .footer-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem 1.25rem;
+      margin: 0 auto 1.5rem;
+    }
+
+    /* `display` is set here rather than borrowing Starlight's `.sl-flex`
+       utility: that utility is unlayered, so it would beat the `display: none`
+       de-duplication rule below, which lives in this layer. */
     .main-site-link {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.5em;
-      margin: 0 auto 1.5rem;
       font-size: var(--sl-text-xs);
       text-decoration: none;
       color: var(--sl-color-gray-3);
@@ -63,13 +114,31 @@ const gaEnabled = Boolean(import.meta.env.PUBLIC_GA_MEASUREMENT_ID) && Astro.sit
     .main-site-link:hover {
       color: var(--sl-color-white);
     }
+    /* "Cookie preferences" is a button (it toggles UI, it doesn't navigate)
+       but reads as one of the links next to it. */
+    button.main-site-link {
+      padding: 0;
+      border: 0;
+      background: none;
+      font: inherit;
+      font-size: var(--sl-text-xs);
+      cursor: pointer;
+    }
+    /* De-duplicate: while the banner is open it carries its own policy link,
+       so the footer one would be the second copy on screen. */
+    .footer-meta.is-consent-open .footer-privacy-link {
+      display: none;
+    }
 
     .cookie-banner {
       display: none;
       position: fixed;
       inset-inline: 0;
       bottom: 0;
-      z-index: 50;
+      /* Above Starlight's nav (--sl-z-index-navbar: 10) and mobile TOC, below
+         its skip link (--sl-z-index-skiplink: 20) so keyboard users can still
+         jump past the page chrome while the banner is up. */
+      z-index: calc(var(--sl-z-index-skiplink, 20) - 1);
       gap: 1rem;
       flex-wrap: wrap;
       align-items: center;
@@ -92,79 +161,165 @@ const gaEnabled = Boolean(import.meta.env.PUBLIC_GA_MEASUREMENT_ID) && Astro.sit
       gap: 0.75rem;
       flex-shrink: 0;
     }
+    /* Accept and Reject are deliberately identical in weight - same size, same
+       padding, same solid fill, one click each. Prominence asymmetry between
+       the two is the most-cited item in EDPB dark-pattern guidance. */
     .cookie-banner-actions button {
       font: inherit;
       font-size: var(--sl-text-sm);
+      font-weight: 600;
       padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
+      border-radius: var(--ol-radius-md, 0.375rem);
       border: 1px solid var(--sl-color-gray-5);
-      background: transparent;
-      color: var(--sl-color-gray-2);
+      background: var(--sl-color-gray-6);
+      color: var(--sl-color-white);
       cursor: pointer;
     }
     .cookie-banner-actions button[data-consent-action='accept'] {
       background: var(--sl-color-accent);
       border-color: var(--sl-color-accent);
-      color: var(--sl-color-black);
+      /* NOT --sl-color-black: this theme maps that to the page canvas, which is
+         near-white in light mode (~2.9:1 on the accent). --ol-on-accent is the
+         token the theme already uses for text on an accent fill. */
+      color: var(--ol-on-accent);
+    }
+    .cookie-banner-actions button:focus-visible {
+      outline: 2px solid var(--sl-color-text-accent);
+      outline-offset: 2px;
     }
   }
 </style>
 
 {gaEnabled && (
-  <script is:inline>
-    (function () {
-      var COOKIE_NAME = 'ol_consent';
-      var ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
+  <Fragment>
+    {/* The ol_consent contract (window.__olConsent), shared verbatim with
+        openlinker.io - see src/lib/consent.ts and README.md § "Cross-site
+        consent cookie (ol_consent)". */}
+    <script is:inline set:html={consentRuntimeScript}></script>
 
-      function readConsent() {
-        var match = document.cookie.split('; ').find(function (c) {
-          return c.indexOf(COOKIE_NAME + '=') === 0;
+    <script is:inline define:vars={{ gaId }}>
+      (function () {
+        var consent = window.__olConsent;
+        if (!consent) return;
+
+        // ---- Google Analytics, basic consent mode -----------------------
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+        window.gtag = gtag;
+
+        // Idempotent: called on load for an already-consenting visitor, and
+        // again by the Accept handler in the same page view.
+        window.__olLoadGa = function () {
+          if (window.__olGaLoaded) return;
+          window.__olGaLoaded = true;
+
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+          document.head.appendChild(s);
+
+          gtag('consent', 'default', {
+            analytics_storage: 'granted',
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied',
+          });
+          gtag('js', new Date());
+          // Sends the page_view for the current page, including the entry page
+          // of a visitor who has just clicked Accept.
+          gtag('config', gaId);
+        };
+
+        if (consent.isGranted()) window.__olLoadGa();
+
+        // ---- Consent banner ---------------------------------------------
+        var banner = document.getElementById('cookie-consent-banner');
+        if (!banner) return;
+        var meta = document.getElementById('footer-meta');
+
+        // Starlight renders this override inside `.main-pane`, which sets
+        // `isolation: isolate` - that traps ANY z-index used below it, so the
+        // fixed right-hand table-of-contents column paints over the banner and
+        // swallows clicks on both buttons at >= lg widths (verified: no z-index
+        // value fixes it from in there). Reparenting to <body> lifts the banner
+        // out of that stacking context.
+        if (banner.parentNode !== document.body) document.body.appendChild(banner);
+        var lastInvoker = null;
+
+        function isVisible() {
+          return banner.classList.contains('is-visible');
+        }
+
+        // The banner is a fixed overlay at the bottom of the viewport; on
+        // narrow screens it can cover a third of the page, including the
+        // mobile table of contents. Pad the body by exactly its height so
+        // nothing ends up unreachable behind it.
+        function applyOffset() {
+          if (!isVisible()) return;
+          document.body.style.paddingBottom = banner.offsetHeight + 'px';
+        }
+
+        function showBanner(invoker) {
+          lastInvoker = invoker || null;
+          banner.classList.add('is-visible');
+          if (meta) meta.classList.add('is-consent-open');
+          applyOffset();
+          // The banner is the LAST element in the document, so without this a
+          // keyboard user would have to tab the entire sidebar and page to
+          // reach something that is visually right in front of them.
+          var first = banner.querySelector('[data-consent-action]');
+          if (first) first.focus();
+        }
+
+        function hideBanner() {
+          banner.classList.remove('is-visible');
+          if (meta) meta.classList.remove('is-consent-open');
+          document.body.style.paddingBottom = '';
+          if (lastInvoker && document.contains(lastInvoker)) lastInvoker.focus();
+          lastInvoker = null;
+        }
+
+        document.addEventListener('click', function (event) {
+          if (!(event.target instanceof Element)) return;
+
+          var actionEl = event.target.closest('[data-consent-action]');
+          if (actionEl) {
+            var accepted = actionEl.getAttribute('data-consent-action') === 'accept';
+            consent.write(accepted ? consent.ACCEPTED : consent.REJECTED);
+            if (accepted) {
+              window.__olLoadGa();
+            } else {
+              // Withdrawing after accepting earlier in this page view: stop
+              // collection AND remove the identifiers the consent allowed,
+              // which otherwise live for two years.
+              if (typeof window.gtag === 'function') {
+                window.gtag('consent', 'update', { analytics_storage: 'denied' });
+              }
+              consent.clearAnalyticsCookies();
+            }
+            hideBanner();
+            return;
+          }
+
+          var prefsEl = event.target.closest('[data-cookie-prefs]');
+          if (prefsEl) showBanner(prefsEl);
         });
-        return match ? match.split('=')[1] : null;
-      }
 
-      // Shared with openlinker.io: a visitor who already answered there
-      // isn't re-prompted here. On any other host (local dev, previews)
-      // the browser scopes the cookie to that host — harmless.
-      function writeConsent(value) {
-        var domain = window.location.hostname.endsWith('openlinker.io') ? '; domain=.openlinker.io' : '';
-        document.cookie = COOKIE_NAME + '=' + value + '; path=/; max-age=' + ONE_YEAR_SECONDS + domain + '; samesite=lax';
-      }
+        // Escape dismisses without recording a choice - so an unanswered
+        // visitor is simply re-asked on the next page view, never silently
+        // opted in.
+        document.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape' && isVisible()) hideBanner();
+        });
 
-      function updateGtagConsent(granted) {
-        if (typeof window.gtag === 'function') {
-          window.gtag('consent', 'update', { analytics_storage: granted ? 'granted' : 'denied' });
-        }
-      }
+        window.addEventListener('resize', applyOffset);
 
-      function showBanner() {
-        var el = document.getElementById('cookie-consent-banner');
-        if (el) el.classList.add('is-visible');
-      }
-
-      function hideBanner() {
-        var el = document.getElementById('cookie-consent-banner');
-        if (el) el.classList.remove('is-visible');
-      }
-
-      document.addEventListener('click', function (event) {
-        if (!(event.target instanceof Element)) return;
-        var actionEl = event.target.closest('[data-consent-action]');
-        if (actionEl) {
-          var accepted = actionEl.getAttribute('data-consent-action') === 'accept';
-          writeConsent(accepted ? 'accepted' : 'rejected');
-          updateGtagConsent(accepted);
-          hideBanner();
-          return;
-        }
-        if (event.target.closest('[data-cookie-prefs]')) {
-          showBanner();
-        }
-      });
-
-      if (readConsent() === null) {
-        showBanner();
-      }
-    })();
-  </script>
+        // Only an exact, current-version value counts as answered. Anything
+        // else (stale, truncated, unknown version, blocked cookies) re-asks.
+        if (consent.read() === null) showBanner(null);
+      })();
+    </script>
+  </Fragment>
 )}
