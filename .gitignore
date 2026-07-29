@@ -16,4 +16,5 @@ public/robots.txt
 # env / misc
 .env
 .env.*
+!.env.example
 .DS_Store
