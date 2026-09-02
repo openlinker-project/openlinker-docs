@@ -93,6 +93,8 @@ export default defineConfig({
             { label: 'Connecting a platform', slug: 'user-guide/connecting-a-platform' },
             { label: 'Catalog & inventory', slug: 'user-guide/catalog-and-inventory' },
             { label: 'Invoices', slug: 'user-guide/invoices' },
+            { label: 'Fiscal receipts', slug: 'user-guide/fiscal-receipts' },
+            { label: 'Sales documents', slug: 'user-guide/sales-documents' },
             { label: 'Listings', slug: 'user-guide/listings' },
             { label: 'Orders', slug: 'user-guide/orders' },
             { label: 'Diagnostics', slug: 'user-guide/diagnostics' },

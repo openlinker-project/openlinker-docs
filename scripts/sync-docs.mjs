@@ -85,6 +85,8 @@ const SOURCES = [
   { src: 'docs/user-guide/02-connecting-a-platform.md', slug: 'user-guide/connecting-a-platform' },
   { src: 'docs/user-guide/03-catalog-and-inventory.md', slug: 'user-guide/catalog-and-inventory' },
   { src: 'docs/user-guide/04-invoices.md', slug: 'user-guide/invoices' },
+  { src: 'docs/user-guide/04a-fiscal-receipts.md', slug: 'user-guide/fiscal-receipts' },
+  { src: 'docs/user-guide/04b-sales-documents.md', slug: 'user-guide/sales-documents' },
   { src: 'docs/user-guide/05-listings.md', slug: 'user-guide/listings' },
   { src: 'docs/user-guide/06-orders.md', slug: 'user-guide/orders' },
   { src: 'docs/user-guide/07-diagnostics.md', slug: 'user-guide/diagnostics' },
