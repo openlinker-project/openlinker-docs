@@ -95,6 +95,7 @@ export default defineConfig({
             { label: 'Invoices', slug: 'user-guide/invoices' },
             { label: 'Listings', slug: 'user-guide/listings' },
             { label: 'Orders', slug: 'user-guide/orders' },
+            { label: 'Analytics', slug: 'user-guide/analytics' },
             { label: 'Diagnostics', slug: 'user-guide/diagnostics' },
             { label: 'Settings & admin', slug: 'user-guide/settings-and-admin' },
           ],
