@@ -46,7 +46,7 @@ const PRIVACY_URL = 'https://openlinker.io/en/legal/';
 <Default {...Astro.props} />
 
 <div id="footer-meta" class="footer-meta">
-  <a class="main-site-link" href="https://openlinker.io/" title="OpenLinker — openlinker.io">
+  <a class="main-site-link" href="https://openlinker.io/en/" title="OpenLinker — openlinker.io">
     <svg
       aria-hidden="true"
       width="14"
@@ -61,6 +61,10 @@ const PRIVACY_URL = 'https://openlinker.io/en/legal/';
       <path d="M19 12H5M12 19l-7-7 7-7" />
     </svg>
     <span>Back to openlinker.io</span>
+  </a>
+
+  <a class="main-site-link" href="https://app.demo.openlinker.io/" title="OpenLinker live demo">
+    <span>Live demo</span>
   </a>
 
   <a class="main-site-link footer-privacy-link" href={PRIVACY_URL} title="Privacy policy">

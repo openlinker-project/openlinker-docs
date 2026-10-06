@@ -1,7 +1,13 @@
 ---
 title: OpenLinker documentation
-description: Self-hosted, open-source e-commerce orchestration — sync orders, inventory, and listings between your shop and the marketplaces you sell on.
+description: Official documentation for OpenLinker, the open-source, self-hosted e-commerce orchestration platform. Set up PrestaShop, WooCommerce, Allegro, ERLI and more.
 template: splash
+# This page lives in this repo, not in the product repo the global editLink
+# points at — an edit link here would 404.
+editUrl: false
+head:
+  - tag: title
+    content: 'OpenLinker Docs: open-source e-commerce orchestration platform'
 hero:
   tagline: The open-source e-commerce orchestration platform. Self-hosted, plugin-native, Apache 2.0.
   image:
@@ -16,6 +22,10 @@ hero:
       link: /plugin-author-guide/
       icon: puzzle
       variant: secondary
+    - text: Try the live demo
+      link: https://app.demo.openlinker.io/
+      icon: external
+      variant: minimal
     - text: GitHub
       link: https://github.com/openlinker-project/openlinker
       icon: external
@@ -23,6 +33,22 @@ hero:
 ---
 
 import { Icon } from '@astrojs/starlight/components';
+
+## What is OpenLinker?
+
+OpenLinker is an open-source, self-hosted e-commerce orchestration platform from the
+[openlinker-project](https://github.com/openlinker-project). It keeps orders, inventory and
+listings in sync between your own shop and the marketplaces you sell on — and connects the
+shipping and invoicing systems around them — without handing your data to a SaaS channel manager.
+
+Shops (PrestaShop, WooCommerce), marketplaces (Allegro, ERLI), couriers (InPost, DPD) and
+invoicing (KSeF, Subiekt nexo) plug in as adapters behind typed capability ports, so a new
+platform is an adapter built against a stable SDK. OpenLinker is licensed under Apache 2.0 and
+runs anywhere Docker does.
+
+- Learn what it does and who it is for on the [OpenLinker website](https://openlinker.io/en/).
+- Click through a shared, view-only instance in the [OpenLinker live demo](https://app.demo.openlinker.io/).
+- Read and contribute to the code in the [OpenLinker GitHub repository](https://github.com/openlinker-project/openlinker).
 
 ## Start here
 

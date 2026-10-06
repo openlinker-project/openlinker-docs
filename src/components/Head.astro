@@ -1,0 +1,81 @@
+---
+// Override for Starlight's <head> slot: renders the default head, then one
+// JSON-LD graph that ties the docs subdomain to the OpenLinker brand entity
+// published on openlinker.io (#13). Without it Google treats docs.openlinker.io
+// as a separate, unbranded site — and the "openlinker" brand query is contested
+// by unrelated "OpenLinker-ai" / "open linker" results.
+//
+// The Organization node is inlined with the SAME @id openlinker.io uses:
+// Google does not reliably follow an @id across domains, so a bare reference
+// would leave the publisher unresolved on this host.
+import Default from '@astrojs/starlight/components/Head.astro';
+
+const MAIN_SITE = 'https://openlinker.io';
+const ORG_ID = `${MAIN_SITE}/#organization`;
+const SOFTWARE_ID = `${MAIN_SITE}/#software`;
+
+const origin = Astro.site!.href.replace(/\/$/, '');
+const websiteId = `${origin}/#website`;
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const isHome = Astro.url.pathname === '/';
+const { title, description } = Astro.locals.starlightRoute.entry.data;
+
+const graph: Record<string, unknown>[] = [
+  {
+    '@type': 'Organization',
+    '@id': ORG_ID,
+    name: 'OpenLinker',
+    url: `${MAIN_SITE}/`,
+    logo: `${MAIN_SITE}/branding/openlinker-avatar.png`,
+    sameAs: [
+      'https://github.com/openlinker-project',
+      'https://github.com/openlinker-project/openlinker',
+    ],
+  },
+  {
+    '@type': 'WebSite',
+    '@id': websiteId,
+    name: 'OpenLinker Docs',
+    alternateName: ['OpenLinker documentation'],
+    url: `${origin}/`,
+    inLanguage: 'en',
+    publisher: { '@id': ORG_ID },
+    isPartOf: { '@id': `${MAIN_SITE}/#website` },
+    about: { '@id': SOFTWARE_ID },
+  },
+];
+
+if (!isHome) {
+  graph.push(
+    {
+      '@type': 'TechArticle',
+      '@id': `${pageUrl}#article`,
+      headline: title,
+      ...(description ? { description } : {}),
+      url: pageUrl,
+      inLanguage: 'en',
+      isPartOf: { '@id': websiteId },
+      publisher: { '@id': ORG_ID },
+      author: { '@id': ORG_ID },
+      about: { '@id': SOFTWARE_ID },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'OpenLinker Docs', item: `${origin}/` },
+        { '@type': 'ListItem', position: 2, name: title, item: pageUrl },
+      ],
+    },
+  );
+}
+
+// Titles/descriptions come from synced product-repo markdown; escaping `<`
+// keeps a stray "</script>" in one from terminating the inline block.
+const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(
+  /</g,
+  '\\u003c',
+);
+---
+
+<Default />
+<script type="application/ld+json" set:html={jsonLd} />

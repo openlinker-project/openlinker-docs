@@ -12,6 +12,10 @@ import starlight from '@astrojs/starlight';
 // dev.docs.openlinker.io.
 const site = process.env.SITE_URL ?? 'https://docs.openlinker.io';
 
+// Default social card until the docs get their own: Starlight emits
+// twitter:card=summary_large_image but no image, so shared links render bare.
+const SOCIAL_IMAGE = 'https://openlinker.io/og/en.png';
+
 // NOTE: nothing GA-related is emitted from this file. Google Analytics is
 // owned end to end by src/components/Footer.astro (loader, consent cookie and
 // banner), so the measurement ID is read in exactly one place and the gtag
@@ -26,12 +30,11 @@ export default defineConfig({
   site,
   // Docs are English-only and live at the root (/getting-started/, not
   // /en/getting-started/). The marketing site uses /en/ + /pl/ prefixes, so
-  // visitors and cross-site links may hit /en/… here — bounce those to the
-  // root equivalent instead of 404ing. If Polish docs ever ship, this becomes
-  // a real /pl/ + /en/ locale split (see astro:i18n) rather than a redirect.
-  redirects: {
-    '/en/[...slug]': '/[...slug]',
-  },
+  // visitors and cross-site links may hit /en/… here. Those are bounced with a
+  // real 301 in docker/nginx.conf — an Astro `redirects` entry on a static
+  // build only emits 200 meta-refresh pages, which search engines treat as
+  // weaker signals. If Polish docs ever ship, this becomes a real /pl/ + /en/
+  // locale split (see astro:i18n) rather than a redirect.
   integrations: [
     starlight({
       title: 'OpenLinker Docs',
@@ -47,6 +50,11 @@ export default defineConfig({
         alt: 'OpenLinker',
       },
       favicon: '/favicon.svg',
+      head: [
+        { tag: 'meta', attrs: { property: 'og:image', content: SOCIAL_IMAGE } },
+        { tag: 'meta', attrs: { property: 'og:image:alt', content: 'OpenLinker' } },
+        { tag: 'meta', attrs: { name: 'twitter:image', content: SOCIAL_IMAGE } },
+      ],
       // Dark is the brand default (matches the marketing site). Starlight
       // still ships a light/dark toggle; OS preference is not auto-followed
       // for first paint because we set the default theme to dark below.
@@ -61,6 +69,9 @@ export default defineConfig({
         // Appends a followed link back to openlinker.io in the page footer
         // (reciprocal SEO cross-link, issue #4). See Footer.astro.
         Footer: './src/components/Footer.astro',
+        // Adds JSON-LD tying the docs to the OpenLinker Organization/WebSite
+        // published on openlinker.io. See Head.astro.
+        Head: './src/components/Head.astro',
       },
       editLink: {
         // Docs are single-sourced from the product repo; "edit" points there.
