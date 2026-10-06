@@ -23,8 +23,19 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # The product commit the docs will be pulled at. Passed to the build as
+      # DOCS_SOURCE_SHA so a product change invalidates the cached `pnpm build`
+      # layer (see the Dockerfile); fails rather than building on an empty
+      # value, which would silently bring the stale cache back.
+      - name: Resolve product docs commit
+        id: source
+        run: |
+          sha="$(git ls-remote https://github.com/openlinker-project/openlinker.git refs/heads/main | cut -f1)"
+          test -n "$sha"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
       - name: Build Docker image
-        run: docker build . --tag openlinker-docs:${{ github.ref_name }} -f Dockerfile --build-arg "SITE_URL=${{ vars.SITE_URL }}" --build-arg "PUBLIC_GA_MEASUREMENT_ID=${{ vars.PUBLIC_GA_MEASUREMENT_ID }}"
+        run: docker build . --tag openlinker-docs:${{ github.ref_name }} -f Dockerfile --build-arg "SITE_URL=${{ vars.SITE_URL }}" --build-arg "PUBLIC_GA_MEASUREMENT_ID=${{ vars.PUBLIC_GA_MEASUREMENT_ID }}" --build-arg "DOCS_SOURCE_SHA=${{ steps.source.outputs.sha }}"
 
       - name: Run Docker image
         working-directory: ${{ secrets.PROJECT_DIR }}

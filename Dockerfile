@@ -26,6 +26,13 @@ ENV SITE_URL=$SITE_URL
 # Product ref the docs are pulled from (override to preview against a branch).
 ARG DOCS_SOURCE_REF="main"
 ENV DOCS_SOURCE_REF=$DOCS_SOURCE_REF
+# The product commit the docs are pulled at, passed by the deploy workflow.
+# The build never reads it: it exists so `RUN pnpm build` below misses the
+# layer cache whenever the product changes. Nothing else in this stage's input
+# changes from one day to the next, so without it every scheduled deploy reused
+# the cached build and the site kept serving its first build (live pages stayed
+# at Last-Modified 2026-07-29 while the daily runs reported success).
+ARG DOCS_SOURCE_SHA=""
 # Google Analytics 4 measurement ID — this is a static build (nginx serves
 # the output with no Node process at runtime), so unlike the SSR marketing
 # site this MUST be baked in at build time or GA never renders. Empty by
