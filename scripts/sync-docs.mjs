@@ -92,6 +92,7 @@ const SOURCES = [
   { src: 'docs/user-guide/07-analytics.md', slug: 'user-guide/analytics' },
   { src: 'docs/user-guide/08-diagnostics.md', slug: 'user-guide/diagnostics' },
   { src: 'docs/user-guide/09-settings-and-admin.md', slug: 'user-guide/settings-and-admin' },
+  { src: 'docs/user-guide/09a-login-page.md', slug: 'user-guide/login-page' },
   // Build adapters
   { src: 'docs/plugin-author-guide.md', slug: 'plugin-author-guide' },
   { src: 'PUBLIC_API.md', slug: 'public-api' },
