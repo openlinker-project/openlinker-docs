@@ -111,6 +111,7 @@ export default defineConfig({
             { label: 'Analytics', slug: 'user-guide/analytics' },
             { label: 'Diagnostics', slug: 'user-guide/diagnostics' },
             { label: 'Settings & admin', slug: 'user-guide/settings-and-admin' },
+            { label: 'Login page', slug: 'user-guide/login-page' },
           ],
         },
         {
