@@ -110,8 +110,13 @@ export default defineConfig({
             { label: 'Orders', slug: 'user-guide/orders' },
             { label: 'Analytics', slug: 'user-guide/analytics' },
             { label: 'Diagnostics', slug: 'user-guide/diagnostics' },
-            { label: 'Settings & admin', slug: 'user-guide/settings-and-admin' },
-            { label: 'Login page', slug: 'user-guide/login-page' },
+            {
+              label: 'Settings & admin',
+              items: [
+                { label: 'Overview', slug: 'user-guide/settings-and-admin' },
+                { label: 'Login page', slug: 'user-guide/login-page' },
+              ],
+            },
           ],
         },
         {
